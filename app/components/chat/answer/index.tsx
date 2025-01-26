@@ -14,6 +14,9 @@ import Tooltip from '@/app/components/base/tooltip'
 import WorkflowProcess from '@/app/components/workflow/workflow-process'
 import { Markdown } from '@/app/components/base/markdown'
 import type { Emoji } from '@/types/tools'
+import { parseSwapParams } from '@/utils/helper'
+import Button from '@/app/components/base/button'
+import Swap from '../../swap'
 
 const OperationBtn = ({ innerContent, onClick, className }: { innerContent: React.ReactNode; onClick?: () => void; className?: string }) => (
   <div
@@ -144,9 +147,11 @@ const Answer: FC<IAnswerProps> = ({
     <div>
       {agent_thoughts?.map((item, index) => (
         <div key={index}>
-          {item.thought && (
-            <Markdown content={item.thought} />
-          )}
+          {item.thought &&
+            (typeof parseSwapParams(item.thought) !== 'string' ?
+              <Swap content={item.thought} /> :
+              (<Markdown content={item.thought} />)
+            )}
           {/* {item.tool} */}
           {/* perhaps not use tool */}
           {!!item.tool && (
@@ -187,7 +192,7 @@ const Answer: FC<IAnswerProps> = ({
                     <LoadingAnim type='text' />
                   </div>
                 )
-                : (isAgentMode
+                : (typeof parseSwapParams(content) !== 'string' ? <Swap content={content} /> : isAgentMode
                   ? agentModeAnswer
                   : (
                     <Markdown content={content} />

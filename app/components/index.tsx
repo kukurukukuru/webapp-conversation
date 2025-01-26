@@ -1,14 +1,14 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 'use client'
 import type { FC } from 'react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import produce, { setAutoFreeze } from 'immer'
 import { useBoolean, useGetState } from 'ahooks'
+import ChatTextarea from './chat/chat-textarea'
+import Welcome from './welcome'
 import useConversation from '@/hooks/use-conversation'
 import Toast from '@/app/components/base/toast'
 import Sidebar from '@/app/components/sidebar'
-import ConfigSence from '@/app/components/config-scence'
 import Header from '@/app/components/header'
 import { fetchAppParams, fetchChatList, fetchConversations, generationConversationName, sendChatMessage, updateFeedback } from '@/service'
 import type { ChatItem, ConversationItem, Feedbacktype, PromptConfig, VisionFile, VisionSettings } from '@/types/app'
@@ -22,6 +22,9 @@ import AppUnavailable from '@/app/components/app-unavailable'
 import { API_KEY, APP_ID, APP_INFO, isShowPrompt, promptTemplate } from '@/config'
 import type { Annotation as AnnotationType } from '@/types/log'
 import { addFileInfos, sortAgentSorts } from '@/utils/tools'
+import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { useWallet } from '@solana/wallet-adapter-react'
+
 
 export type IMainProps = {
   params: any
@@ -29,6 +32,7 @@ export type IMainProps = {
 
 const Main: FC<IMainProps> = () => {
   const { t } = useTranslation()
+  const [textareaHeight, setTextareaHeight] = useState<number>(0);
   const media = useBreakpoints()
   const isMobile = media === MediaType.mobile
   const hasSetAppConfig = APP_ID && API_KEY
@@ -51,8 +55,10 @@ const Main: FC<IMainProps> = () => {
 
   useEffect(() => {
     if (APP_INFO?.title)
-      document.title = `${APP_INFO.title} - Powered by Dify`
-  }, [APP_INFO?.title])
+      document.title = `${APP_INFO.title}`
+  }, [])
+
+  const { connected } = useWallet();
 
   // onData change thought (the produce obj). https://github.com/immerjs/immer/issues/576
   useEffect(() => {
@@ -619,14 +625,16 @@ const Main: FC<IMainProps> = () => {
     return <Loading type='app' />
 
   return (
-    <div className='bg-gray-100'>
-      <Header
-        title={APP_INFO.title}
-        isMobile={isMobile}
-        onShowSideBar={showSidebar}
-        onCreateNewChat={() => handleConversationIdChange('-1')}
-      />
-      <div className="flex rounded-t-2xl bg-white overflow-hidden">
+    <div className={`h-full w-full flex bg-white undefined false ${isMobile && 'flex-col'}`}>
+      {
+        isMobile && <Header
+          title={APP_INFO.title}
+          isMobile={isMobile}
+          onShowSideBar={showSidebar}
+          onCreateNewChat={() => handleConversationIdChange('-1')}
+        />
+      }
+      <div className="h-full w-full flex rounded-t-2xl bg-white overflow-hidden">
         {/* sidebar */}
         {!isMobile && renderSidebar()}
         {isMobile && isShowSidebar && (
@@ -639,37 +647,73 @@ const Main: FC<IMainProps> = () => {
             </div>
           </div>
         )}
-        {/* main */}
-        <div className='flex-grow flex flex-col h-[calc(100vh_-_3rem)] overflow-y-auto'>
-          <ConfigSence
-            conversationName={conversationName}
-            hasSetInputs={hasSetInputs}
-            isPublicVersion={isShowPrompt}
-            siteInfo={APP_INFO}
-            promptConfig={promptConfig}
-            onStartChat={handleStartChat}
-            canEditInputs={canEditInputs}
-            savedInputs={currInputs as Record<string, any>}
-            onInputsChange={setCurrInputs}
-          ></ConfigSence>
 
-          {
-            hasSetInputs && (
-              <div className='relative grow h-[200px] pc:w-[794px] max-w-full mobile:w-full pb-[66px] mx-auto mb-3.5 overflow-hidden'>
-                <div className='h-full overflow-y-auto' ref={chatListDomRef}>
-                  <Chat
-                    chatList={chatList}
-                    onSend={handleSend}
-                    onFeedback={handleFeedback}
-                    isResponding={isResponding}
-                    checkCanSend={checkCanSend}
-                    visionConfig={visionConfig}
-                  />
-                </div>
-              </div>)
-          }
+        {/* main */}
+        <div className={`w-full grow overflow-hidden ${'flex items-center justify-center'}`}>
+          <div className='h-full w-full bg-chatbot-bg overflow-hidden' >
+            <div className='relative h-full'>
+
+              {hasSetInputs
+                ? (
+                  <>
+                    <div className='relative h-full overflow-y-auto overflow-x-hidden' style={{ paddingBottom: `${textareaHeight + 32}px` }}>
+                      <div className="sticky top-0 flex items-center justify-between px-8 h-16 bg-white/80 text-base font-medium text-gray-900 border-b-[0.5px] border-b-gray-100 backdrop-blur-md z-10 false">
+                        <span>{conversationName}</span>
+
+                        {
+                          !isMobile && <div className='flex items-center gap-2'>
+                            <WalletMultiButton style={{ backgroundColor: 'var(--Kontos-Blue, #413dec)', borderRadius: '99px' }} />
+                            {
+                              connected && <WalletDisconnectButton style={{ backgroundColor: 'var(--Deep-800, #1a2535)', borderRadius: '99px' }} />
+                            }
+
+                          </div>
+                        }
+
+                      </div>
+
+                      <div className='px-8 mx-auto pt-6 w-full max-w-[720px] false' ref={chatListDomRef}>
+                        <Chat
+                          chatList={chatList}
+                          onFeedback={handleFeedback}
+                          isResponding={isResponding}
+                        />
+                      </div>
+                    </div>
+                    {/* textarea */}
+                    <ChatTextarea
+
+                      onSend={handleSend}
+                      isResponding={isResponding}
+                      checkCanSend={checkCanSend}
+                      visionConfig={visionConfig}
+                      setHeight={setTextareaHeight} />
+                  </>
+                )
+
+                : (
+                  <div className='w-full h-full' >
+                    <Welcome
+                      conversationName={conversationName}
+                      hasSetInputs={hasSetInputs}
+                      isPublicVersion={isShowPrompt}
+                      siteInfo={APP_INFO}
+                      promptConfig={promptConfig}
+                      onStartChat={handleStartChat}
+                      canEditInputs={canEditInputs}
+                      savedInputs={currInputs as Record<string, any>}
+                      onInputsChange={setCurrInputs}
+                    />
+                  </div>
+                )}
+
+            </div>
+          </div>
+
         </div>
+
       </div>
+
     </div>
   )
 }

@@ -9,7 +9,7 @@ import { atelierHeathLight } from 'react-syntax-highlighter/dist/esm/styles/hljs
 
 export function Markdown(props: { content: string }) {
   return (
-    <div className="markdown-body">
+    <div className="markdown-body break-all">
       <ReactMarkdown
         remarkPlugins={[RemarkMath, RemarkGfm, RemarkBreaks]}
         rehypePlugins={[
