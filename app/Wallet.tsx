@@ -1,33 +1,41 @@
-"use client"
-import React, { FC, ReactNode, useMemo } from 'react';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+"use client";
+import React, { FC, ReactNode, useMemo } from "react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import {
   WalletDisconnectButton,
-  WalletModalProvider, WalletMultiButton,
-} from '@solana/wallet-adapter-react-ui';
-import { clusterApiUrl, PublicKey } from '@solana/web3.js';
+  WalletModalProvider,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+import { clusterApiUrl, PublicKey } from "@solana/web3.js";
 
 // Default styles that can be overridden by your app
-import '@solana/wallet-adapter-react-ui/styles.css';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
-import { CoinbaseWalletAdapter } from '@solana/wallet-adapter-coinbase'
-import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare'
-import { TorusWalletAdapter } from '@solana/wallet-adapter-torus'
-import { WalletConnectWalletAdapter } from '@solana/wallet-adapter-walletconnect'
-import { SafePalWalletAdapter } from '@solana/wallet-adapter-safepal'
-import { WALLET_CONNECT_METADATA, WALLET_CONNECT_PROJECT_ID } from '@/config';
+import "@solana/wallet-adapter-react-ui/styles.css";
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
+import { CoinbaseWalletAdapter } from "@solana/wallet-adapter-coinbase";
+import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
+import { TorusWalletAdapter } from "@solana/wallet-adapter-torus";
+import { WalletConnectWalletAdapter } from "@solana/wallet-adapter-walletconnect";
+import { SafePalWalletAdapter } from "@solana/wallet-adapter-safepal";
+import { WALLET_CONNECT_METADATA, WALLET_CONNECT_PROJECT_ID } from "@/config";
 
 interface WalletProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export const Wallet: FC<WalletProps> = ({ children }) => {
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
-  const network = WalletAdapterNetwork.Devnet;
+  const network = WalletAdapterNetwork.Mainnet;
 
   // You can also provide a custom RPC endpoint.
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = useMemo(
+    () =>
+      "https://lingering-omniscient-feather.solana-mainnet.quiknode.pro/444d2fae17579b4233093e9c1e05019d3d415e6a/",
+    []
+  );
 
   const wallets = useMemo(
     () => [
@@ -47,7 +55,13 @@ export const Wallet: FC<WalletProps> = ({ children }) => {
       new CoinbaseWalletAdapter(),
       new SolflareWalletAdapter(),
       new TorusWalletAdapter(),
-      new WalletConnectWalletAdapter({ network: WalletAdapterNetwork.Mainnet, options: { projectId: WALLET_CONNECT_PROJECT_ID, metadata: WALLET_CONNECT_METADATA, } }),
+      new WalletConnectWalletAdapter({
+        network: WalletAdapterNetwork.Mainnet,
+        options: {
+          projectId: WALLET_CONNECT_PROJECT_ID,
+          metadata: WALLET_CONNECT_METADATA,
+        },
+      }),
       new SafePalWalletAdapter(),
     ],
 
@@ -61,7 +75,7 @@ export const Wallet: FC<WalletProps> = ({ children }) => {
         <WalletModalProvider>
           {/* <WalletMultiButton />
           <WalletDisconnectButton /> */}
-          { /* Your app's components go here, nested within the context providers. */}
+          {/* Your app's components go here, nested within the context providers. */}
           {children}
         </WalletModalProvider>
       </WalletProvider>

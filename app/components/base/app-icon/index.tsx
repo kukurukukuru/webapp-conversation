@@ -1,17 +1,18 @@
-import type { FC } from 'react'
-import classNames from 'classnames'
-import style from './style.module.css'
+import type { FC } from "react";
+import classNames from "classnames";
+import style from "./style.module.css";
+import Image from "next/image";
 
 export type AppIconProps = {
-  size?: 'xs' | 'tiny' | 'small' | 'medium' | 'large'
-  rounded?: boolean
-  icon?: string
-  background?: string
-  className?: string
-}
+  size?: "xs" | "tiny" | "small" | "medium" | "large";
+  rounded?: boolean;
+  icon?: string;
+  background?: string;
+  className?: string;
+};
 
 const AppIcon: FC<AppIconProps> = ({
-  size = 'medium',
+  size = "medium",
   rounded = false,
   background,
   className,
@@ -20,17 +21,17 @@ const AppIcon: FC<AppIconProps> = ({
     <span
       className={classNames(
         style.appIcon,
-        size !== 'medium' && style[size],
+        size !== "medium" && style[size],
         rounded && style.rounded,
-        className ?? '',
+        className ?? ""
       )}
       style={{
-        background,
+        background: "transparent",
       }}
     >
-      🤖
+      <Image src={"/images/kontos.svg"} width={32} height={32} alt="" />
     </span>
-  )
-}
+  );
+};
 
-export default AppIcon
+export default AppIcon;

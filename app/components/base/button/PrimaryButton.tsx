@@ -59,7 +59,7 @@ const PrimaryButton = <T,>({
     >
       {loading ? (
         <Image
-          src={"/icons/general/loading.gif"}
+          src={"/images/loading.gif"}
           width={50}
           height={18}
           alt="loading"
